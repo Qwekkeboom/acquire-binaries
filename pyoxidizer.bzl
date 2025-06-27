@@ -30,6 +30,7 @@ def make_exe():
         "dissect.hypervisor",
         "dissect.ntfs",
         "dissect.regf",
+        "dissect.sql",
         "dissect.squashfs",
         "dissect.target",
         "dissect.util",
