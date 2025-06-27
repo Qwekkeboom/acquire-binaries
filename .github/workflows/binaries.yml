@@ -4,7 +4,7 @@ on:
   push
 
 env:
-  VERSION: 3.17
+  VERSION: 3.19
 
 jobs:
   build-linux-gnu:
