@@ -68,7 +68,7 @@ def make_exe():
         if resource.name.startswith("Crypto"):
             continue
 
-        if type(resource) == "PythonExtensionModule" && is_windows:
+        if type(resource) == "PythonExtensionModule" and is_windows:
             resource.set_location("filesystem-relative:lib")
             
         exe.add_python_resource(resource)
