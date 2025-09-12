@@ -1,5 +1,3 @@
-import sys
-
 def make_exe():
     dist = default_python_distribution(flavor=VARS["flavor"])
 
@@ -44,16 +42,19 @@ def make_exe():
 
     # If you want to build acquire from the local source directory, uncomment this and remove "acquire" from pip_args
     # exe.add_python_resources(exe.read_package_root(CWD, ["acquire"]))
-
+    is_windows = False
+    
     # Lie about our platform to get cross-compilation to work (msgpack fails to download otherwise)
     if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
         pip_args += ["--platform", "win_amd64"]
+        is_windows = True
     elif BUILD_TARGET_TRIPLE == "i686-pc-windows-msvc":
         pip_args += ["--platform", "win32"]
+        is_windows = True
     elif BUILD_TARGET_TRIPLE == "x86_64-unknown-linux-musl":
         pip_args += ["--platform", "manylinux2014_x86_64"]
 
-    is_windows = sys.platform.startswith("win")
+    
     
     # Use pip_download for all the dependencies
     for resource in exe.pip_download(pip_args):
