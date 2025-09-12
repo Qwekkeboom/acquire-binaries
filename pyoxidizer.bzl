@@ -1,3 +1,5 @@
+import sys
+
 def make_exe():
     dist = default_python_distribution(flavor=VARS["flavor"])
 
@@ -51,7 +53,6 @@ def make_exe():
     elif BUILD_TARGET_TRIPLE == "x86_64-unknown-linux-musl":
         pip_args += ["--platform", "manylinux2014_x86_64"]
 
-    import sys
     is_windows = sys.platform.startswith("win")
     
     # Use pip_download for all the dependencies
