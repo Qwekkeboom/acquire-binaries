@@ -148,7 +148,6 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/cache@v4
         with:
           path: |
@@ -158,40 +157,44 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
           key: macos-cache
-
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
-
+          python-version: '3.10'
       - name: Install dependencies
         run: pip install pyoxidizer dissect
-
       - name: Install MacOS SDK
         env:
           MACOSX_SDK_VERSION: 11.3
-          CMAKE_OSX_SYSROOT: /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk
         run: |
-          curl -L -O --connect-timeout 5 --max-time 10 --retry 5  --retry-delay 0 --retry-max-time 40 --retry-connrefused --retry-all-errors https://github.com/phracker/MacOSX-SDKs/releases/download/${{ env.MACOSX_SDK_VERSION }}/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz
-          tar -xf MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz -C "$(dirname ${{ env.CMAKE_OSX_SYSROOT }})"
-
-          plutil -replace MinimumSDKVersion -string ${{ env.MACOSX_SDK_VERSION }} /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
-          plutil -replace DTSDKName -string macosx${{ env.MACOSX_SDK_VERSION }}internal /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
-
+          # Create SDK directory in a writable location
+          SDK_DIR="/tmp/MacOSX-SDKs"
+          mkdir -p "$SDK_DIR"
+          
+          # Download and extract SDK
+          curl -L -O --connect-timeout 5 --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 40 --retry-connrefused --retry-all-errors \
+            "https://github.com/phracker/MacOSX-SDKs/releases/download/${{ env.MACOSX_SDK_VERSION }}/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz"
+          
+          tar -xf "MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz" -C "$SDK_DIR"
+          
+          # Set up environment variables for subsequent steps
+          echo "CMAKE_OSX_SYSROOT=$SDK_DIR/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk" >> $GITHUB_ENV
+          echo "SDKROOT=$SDK_DIR/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=${{ env.MACOSX_SDK_VERSION }}" >> $GITHUB_ENV
+          
+          # Verify SDK installation
+          ls -la "$SDK_DIR/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk"
       - name: Build binary
         run: |
           mkdir -p build/lib/dissect/target/plugins
           target-build-pluginlist > build/lib/dissect/target/plugins/_pluginlist.py
           pyoxidizer build --release --target-triple x86_64-apple-darwin --var flavor standalone --var version ${{ env.VERSION }}
           pyoxidizer build --release --target-triple aarch64-apple-darwin --var flavor standalone --var version ${{ env.VERSION }}
-
           mkdir -p build/universal2-apple-darwin/release/install
           cp -r build/x86_64-apple-darwin/release/install/* build/universal2-apple-darwin/release/install/
           lipo -create build/x86_64-apple-darwin/release/install/acquire build/aarch64-apple-darwin/release/install/acquire -output build/universal2-apple-darwin/release/install/acquire
           strip build/universal2-apple-darwin/release/install/acquire
-
       - name: Verify binary
         run: build/universal2-apple-darwin/release/install/acquire --help
-
       - uses: actions/upload-artifact@v4
         with:
           name: acquire-macos
