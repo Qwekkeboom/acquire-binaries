@@ -8,7 +8,7 @@ def make_exe():
 
     python_config = dist.make_python_interpreter_config()
     python_config.oxidized_importer = True
-    python_config.filesystem_importer = True
+    python_config.filesystem_importer = False
     python_config.run_module = "acquire.acquire"
 
     exe = dist.to_python_executable(
@@ -50,7 +50,7 @@ def make_exe():
         pip_args += ["--platform", "win32"]
     elif BUILD_TARGET_TRIPLE == "x86_64-unknown-linux-musl":
         pip_args += ["--platform", "manylinux2014_x86_64"]
-
+    
     # Use pip_download for all the dependencies
     for resource in exe.pip_download(pip_args):
         # Discard msgpack's extension, it has a pure Python fallback
@@ -65,7 +65,13 @@ def make_exe():
         if resource.name.startswith("Crypto"):
             continue
 
-        exe.add_python_resource(resource)
+        if type(resource) == "PythonExtensionModule":
+            if IS_WINDOWS:  # provided by PyOxidizer
+                exe.add_python_resource(resource, location="filesystem-relative:lib")
+            else:
+                exe.add_python_resource(resource)
+        else:
+            exe.add_python_resource(resource)
 
     # Add the _pluginlist.py "overlay"
     # This is created by the CI, if you want to build manually, be sure to generate it:
