@@ -5,6 +5,7 @@ def make_exe():
     policy.bytecode_optimize_level_two = True
     policy.file_scanner_classify_files = True
     policy.resources_location = "in-memory"
+    policy.resources_location_fallback = "filesystem-relative:lib"
 
     python_config = dist.make_python_interpreter_config()
     python_config.oxidized_importer = True
