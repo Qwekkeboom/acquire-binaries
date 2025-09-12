@@ -68,9 +68,6 @@ def make_exe():
         # Discard pycryptodome fully for the time being, unsure how to make it play nicely
         if resource.name.startswith("Crypto"):
             continue
-
-        if type(resource) == "PythonExtensionModule" and is_windows:
-            policy.extension_module_location = "filesystem-relative:lib"
             
         exe.add_python_resource(resource)
 
