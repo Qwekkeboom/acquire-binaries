@@ -50,6 +50,9 @@ def make_exe():
         pip_args += ["--platform", "win32"]
     elif BUILD_TARGET_TRIPLE == "x86_64-unknown-linux-musl":
         pip_args += ["--platform", "manylinux2014_x86_64"]
+
+    import sys
+    is_windows = sys.platform.startswith("win")
     
     # Use pip_download for all the dependencies
     for resource in exe.pip_download(pip_args):
@@ -66,9 +69,11 @@ def make_exe():
             continue
 
         if type(resource) == "PythonExtensionModule":
-            if IS_WINDOWS:  # provided by PyOxidizer
+            if is_windows:
+                # Windows: .pyd must live on disk
                 exe.add_python_resource(resource, location="filesystem-relative:lib")
             else:
+                # Linux/macOS: memory loading works
                 exe.add_python_resource(resource)
         else:
             exe.add_python_resource(resource)
