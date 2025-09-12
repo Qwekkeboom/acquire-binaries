@@ -69,7 +69,7 @@ def make_exe():
             continue
 
         if type(resource) == "PythonExtensionModule" and is_windows:
-            resource.set_location("filesystem-relative:lib")
+            policy.extension_module_location = "filesystem-relative:lib"
             
         exe.add_python_resource(resource)
 
