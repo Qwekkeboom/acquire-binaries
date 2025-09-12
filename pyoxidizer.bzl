@@ -54,8 +54,6 @@ def make_exe():
     elif BUILD_TARGET_TRIPLE == "x86_64-unknown-linux-musl":
         pip_args += ["--platform", "manylinux2014_x86_64"]
 
-    
-    
     # Use pip_download for all the dependencies
     for resource in exe.pip_download(pip_args):
         # Discard msgpack's extension, it has a pure Python fallback
@@ -70,15 +68,10 @@ def make_exe():
         if resource.name.startswith("Crypto"):
             continue
 
-        if type(resource) == "PythonExtensionModule":
-            if is_windows:
-                # Windows: .pyd must live on disk
-                exe.add_python_resource(resource, location="filesystem-relative:lib")
-            else:
-                # Linux/macOS: memory loading works
-                exe.add_python_resource(resource)
-        else:
-            exe.add_python_resource(resource)
+        if type(resource) == "PythonExtensionModule" && is_windows:
+            resource.set_location("filesystem-relative:lib")
+            
+        exe.add_python_resource(resource)
 
     # Add the _pluginlist.py "overlay"
     # This is created by the CI, if you want to build manually, be sure to generate it:
