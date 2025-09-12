@@ -124,7 +124,7 @@ jobs:
         run: |
           mkdir -p build/lib/dissect/target/plugins
           target-build-pluginlist > build/lib/dissect/target/plugins/_pluginlist.py
-          pyoxidizer build --release --target-triple x86_64-pc-windows-msvc --var flavor standalone_static --var version ${{ env.VERSION }}
+          pyoxidizer build --release --target-triple x86_64-pc-windows-msvc --var flavor standalone_dynamic --var version ${{ env.VERSION }}
           strip build/x86_64-pc-windows-msvc/release/install/acquire.exe
 
       - name: Verify binary
