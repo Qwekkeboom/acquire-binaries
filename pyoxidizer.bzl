@@ -8,7 +8,7 @@ def make_exe():
 
     python_config = dist.make_python_interpreter_config()
     python_config.oxidized_importer = True
-    python_config.filesystem_importer = False
+    python_config.filesystem_importer = True
     python_config.run_module = "acquire.acquire"
 
     exe = dist.to_python_executable(
