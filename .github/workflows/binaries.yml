@@ -169,13 +169,13 @@ jobs:
       - name: Install MacOS SDK
         env:
           MACOSX_SDK_VERSION: 11.3
-          CMAKE_OSX_SYSROOT: /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk
+          CMAKE_OSX_SYSROOT: /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk
         run: |
           curl -L -O --connect-timeout 5 --max-time 10 --retry 5  --retry-delay 0 --retry-max-time 40 --retry-connrefused --retry-all-errors https://github.com/phracker/MacOSX-SDKs/releases/download/${{ env.MACOSX_SDK_VERSION }}/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz
           tar -xf MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz -C "$(dirname ${{ env.CMAKE_OSX_SYSROOT }})"
 
-          plutil -replace MinimumSDKVersion -string ${{ env.MACOSX_SDK_VERSION }} /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
-          plutil -replace DTSDKName -string macosx${{ env.MACOSX_SDK_VERSION }}internal /Applications/Xcode_15.4.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
+          plutil -replace MinimumSDKVersion -string ${{ env.MACOSX_SDK_VERSION }} /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
+          plutil -replace DTSDKName -string macosx${{ env.MACOSX_SDK_VERSION }}internal /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
 
       - name: Build binary
         run: |
