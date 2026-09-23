@@ -57,6 +57,11 @@ def make_exe():
         if resource.name == "msgpack._cmsgpack":
             continue
 
+        # Discard the native Rust extensions of dissect.util, they can't be loaded
+        # from memory on Windows and have a pure Python fallback (lz4, lzo and crc32c)
+        if resource.name.startswith("dissect.util._native"):
+            continue
+
         # The crypto portions of minio aren't needed for normal usage
         if resource.name == "_cffi_backend" or resource.name.startswith("_argon2_cffi_bindings"):
             continue
