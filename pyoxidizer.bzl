@@ -20,7 +20,7 @@ def make_exe():
 
     # The default dependency list of acquire doesn't include enough, and full includes some that are hard to package
     pip_args = [
-        "acquire",
+        "acquire==" + VARS["version"],
         "dissect.cstruct",
         "dissect.eventlog",
         "dissect.evidence",
@@ -40,7 +40,7 @@ def make_exe():
         "minio",
     ]
 
-    # If you want to build acquire from the local source directory, uncomment this and remove "acquire" from pip_args
+    # If you want to build acquire from the local source directory, uncomment this and remove the acquire pin from pip_args
     # exe.add_python_resources(exe.read_package_root(CWD, ["acquire"]))
 
     # Lie about our platform to get cross-compilation to work (msgpack fails to download otherwise)
