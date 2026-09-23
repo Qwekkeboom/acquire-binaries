@@ -169,13 +169,15 @@ jobs:
       - name: Install MacOS SDK
         env:
           MACOSX_SDK_VERSION: 11.3
-          CMAKE_OSX_SYSROOT: /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk
         run: |
-          curl -L -O --connect-timeout 5 --max-time 10 --retry 5  --retry-delay 0 --retry-max-time 40 --retry-connrefused --retry-all-errors https://github.com/phracker/MacOSX-SDKs/releases/download/${{ env.MACOSX_SDK_VERSION }}/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz
-          tar -xf MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz -C "$(dirname ${{ env.CMAKE_OSX_SYSROOT }})"
+          # Resolve the active Xcode so this keeps working when GitHub rotates runner images
+          MACOSX_PLATFORM_DIR="$(xcode-select -p)/Platforms/MacOSX.platform"
 
-          plutil -replace MinimumSDKVersion -string ${{ env.MACOSX_SDK_VERSION }} /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
-          plutil -replace DTSDKName -string macosx${{ env.MACOSX_SDK_VERSION }}internal /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Info.plist
+          curl -L -O --connect-timeout 5 --max-time 10 --retry 5  --retry-delay 0 --retry-max-time 40 --retry-connrefused --retry-all-errors https://github.com/phracker/MacOSX-SDKs/releases/download/${{ env.MACOSX_SDK_VERSION }}/MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz
+          tar -xf MacOSX${{ env.MACOSX_SDK_VERSION }}.sdk.tar.xz -C "$MACOSX_PLATFORM_DIR/Developer/SDKs"
+
+          plutil -replace MinimumSDKVersion -string ${{ env.MACOSX_SDK_VERSION }} "$MACOSX_PLATFORM_DIR/Info.plist"
+          plutil -replace DTSDKName -string macosx${{ env.MACOSX_SDK_VERSION }}internal "$MACOSX_PLATFORM_DIR/Info.plist"
 
       - name: Build binary
         run: |
@@ -196,3 +198,40 @@ jobs:
         with:
           name: acquire-macos
           path: build/universal2-apple-darwin/release/install/*
+
+  release:
+    name: Draft GitHub Release
+    needs: [build-linux-gnu, build-linux-musl, build-windows, build-macos]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Verify tag matches VERSION
+        run: |
+          if [ "$GITHUB_REF_NAME" != "$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match workflow VERSION $VERSION - bump VERSION or use a matching tag."
+            exit 1
+          fi
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Prepare release assets
+        run: |
+          mkdir release
+          mv dist/acquire-linux/acquire "release/acquire-${VERSION}-linux-x86_64-gnu"
+          mv dist/acquire-linux-musl/acquire "release/acquire-${VERSION}-linux-x86_64-musl"
+          mv dist/acquire-windows/acquire.exe "release/acquire-${VERSION}-windows-x86_64.exe"
+          mv dist/acquire-macos/acquire "release/acquire-${VERSION}-macos-universal2"
+          cd release && sha256sum * > SHA256SUMS
+          ls -l
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: release/*
