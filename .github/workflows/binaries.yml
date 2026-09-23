@@ -21,9 +21,9 @@ jobs:
     container: quay.io/pypa/manylinux_2_28_x86_64
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cache/pyoxidizer/
@@ -46,7 +46,7 @@ jobs:
       - name: Verify binary
         run: build/x86_64-unknown-linux-gnu/release/install/acquire --help
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: acquire-linux
           path: build/x86_64-unknown-linux-gnu/release/install/*
@@ -59,14 +59,14 @@ jobs:
       musl_version: 1.2.4
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Setup Rust
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain stable
           echo "PATH=$HOME/.cargo/bin:$PATH" >> $GITHUB_ENV
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/.cache/pyoxidizer/
@@ -100,7 +100,7 @@ jobs:
       - name: Verify binary
         run: build/x86_64-unknown-linux-musl/release/install/acquire --help
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: acquire-linux-musl
           path: build/x86_64-unknown-linux-musl/release/install/*
@@ -109,9 +109,9 @@ jobs:
     name: Build Windows
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~\AppData\Local\pyoxidizer\
@@ -121,7 +121,7 @@ jobs:
             ~\.cargo\git\db\
           key: windows-cache
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
@@ -146,7 +146,7 @@ jobs:
             build/x86_64-pc-windows-msvc/release/install/acquire.exe
           args: --ultra-brute
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: acquire-windows
           path: build/x86_64-pc-windows-msvc/release/install/*
@@ -155,9 +155,9 @@ jobs:
     name: Build macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
-      - uses: actions/cache@v5
+      - uses: actions/cache@v6
         with:
           path: |
             ~/Library/Caches/pyoxidizer/
@@ -167,7 +167,7 @@ jobs:
             ~/.cargo/git/db/
           key: macos-cache
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.10'
 
@@ -202,7 +202,7 @@ jobs:
       - name: Verify binary
         run: build/universal2-apple-darwin/release/install/acquire --help
 
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v7
         with:
           name: acquire-macos
           path: build/universal2-apple-darwin/release/install/*
@@ -223,7 +223,7 @@ jobs:
           fi
 
       - name: Download artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           path: dist
 
