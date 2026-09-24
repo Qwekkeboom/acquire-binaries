@@ -18,26 +18,39 @@ def make_exe():
     )
     exe.windows_runtime_dlls_mode = "when-present"
 
-    # The default dependency list of acquire doesn't include enough, and full includes some that are hard to package
+    # Dependency list of acquire: everything the collection modules and the registered
+    # target plugins need, excluding what can't be packaged in this build:
+    # - dissect.fve and pycryptodome: crypto extension modules are filtered out
+    # - backports.zstd: compiled extension, cannot be loaded from memory on Windows
+    # - fusepy: sdist only, incompatible with PyOxidizer's binary-only pip download
+    # - ipython: interactive shell only, not needed for acquisition
     pip_args = [
         "acquire==" + VARS["version"],
+        "asn1crypto",
+        "dissect.cim",
+        "dissect.clfs",
         "dissect.cstruct",
+        "dissect.etl",
         "dissect.eventlog",
         "dissect.evidence",
+        "dissect.executable",
         "dissect.extfs",
         "dissect.fat",
         "dissect.ffs",
         "dissect.hypervisor",
         "dissect.ntfs",
+        "dissect.ole",
         "dissect.regf",
-        "dissect.sql",
+        "dissect.shellitem",
         "dissect.squashfs",
         "dissect.target",
+        "dissect.thumbcache",
         "dissect.util",
         "dissect.vmfs",
         "dissect.volume",
         "dissect.xfs",
         "minio",
+        "ruamel.yaml",
     ]
 
     # If you want to build acquire from the local source directory, uncomment this and remove the acquire pin from pip_args
